@@ -11,7 +11,7 @@ import pandas as pd
 import six
 import psutil
 from configparser import ConfigParser
-from Util import FileUtil
+# from Util import FileUtil
 
 
 """主进程pid，使用并行时由于ABuEnvProcess会拷贝主进程注册了的模块信息，所以可以用g_main_pid来判断是否在主进程"""
@@ -33,14 +33,14 @@ g_cpu_cnt = psutil.cpu_count(logical=True) * 1
 root_drive = path.expanduser('~')
 
 """数据缓存主目录文件夹"""
-g_project_root = path.join(root_drive, 'jquant')
-"""数据文件夹 ~/jquant/data"""
+g_project_root = path.join(root_drive, 'FinTrade')
+"""数据文件夹 ~/FinTrade/data"""
 g_project_data_dir = path.join(g_project_root, 'sourcefile')
-"""日志文件夹 ~/jquant/log"""
+"""日志文件夹 ~/FinTrade/log"""
 g_project_log_dir = path.join(g_project_root, 'log')
-"""数据库文件夹 ~/jquant/db"""
+"""数据库文件夹 ~/FinTrade/db"""
 g_project_db_dir = path.join(g_project_root, 'db')
-"""缓存文件夹 ~/jquant/cache"""
+"""缓存文件夹 ~/FinTrade/cache"""
 
 g_mysql_connection = {}
 g_price_file = {}
@@ -54,6 +54,7 @@ g_market_trade_year = 252
 
 class ConfigSection(Enum):
     E_MYSQL = 'mysql'
+    E_MSSQL='mssql'
     E_PRICE_FILE = 'pricefile'
     E_TICKER = 'ticker'
     E_BENCHMARK ='benchmark'
@@ -79,6 +80,7 @@ def read_config(filename='config.ini'):
     :return: a dictionary of database parameters
     """
     global g_mysql_connection
+    global
     global g_price_file
     global g_tick_list
     global g_benchmark
@@ -96,9 +98,9 @@ def read_config(filename='config.ini'):
                 dict1[option] = None
         return dict1
 
-    if not FileUtil.file_exist(filename):
-        print("configuration file {} does not exit.".format(filename))
-        return
+    # if not FileUtil.file_exist(filename):
+    #     print("configuration file {} does not exit.".format(filename))
+    #     return
 
     # create parser and read ini configuration file
     parser = ConfigParser()
