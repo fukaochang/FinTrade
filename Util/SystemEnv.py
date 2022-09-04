@@ -11,7 +11,7 @@ import pandas as pd
 import six
 import psutil
 from configparser import ConfigParser
-# from Util import FileUtil
+from Util import FileUtil
 
 
 """主进程pid，使用并行时由于ABuEnvProcess会拷贝主进程注册了的模块信息，所以可以用g_main_pid来判断是否在主进程"""
@@ -42,15 +42,19 @@ g_project_log_dir = path.join(g_project_root, 'log')
 g_project_db_dir = path.join(g_project_root, 'db')
 """缓存文件夹 ~/FinTrade/cache"""
 
-g_mysql_connection = {}
-g_price_file = {}
-g_tick_list = {}
-g_benchmark={}
+
 
 """市场中1年交易日，默认250日"""
 # 美股252天
 g_market_trade_year = 252
 
+
+g_mysql_connection = {}
+g_mssql_connection = {}
+g_price_file = {}
+g_tick_list = {}
+g_benchmark={}
+g_globaldb_constr=""
 
 class ConfigSection(Enum):
     E_MYSQL = 'mysql'
@@ -80,10 +84,11 @@ def read_config(filename='config.ini'):
     :return: a dictionary of database parameters
     """
     global g_mysql_connection
-    global
+    global g_mssql_connection
     global g_price_file
     global g_tick_list
     global g_benchmark
+    global g_globaldb_constr
 
     def configSectionMap(p_section):
         dict1 = {}
@@ -98,9 +103,9 @@ def read_config(filename='config.ini'):
                 dict1[option] = None
         return dict1
 
-    # if not FileUtil.file_exist(filename):
-    #     print("configuration file {} does not exit.".format(filename))
-    #     return
+    if not FileUtil.file_exist(filename):
+        print("configuration file {} does not exit.".format(filename))
+        return
 
     # create parser and read ini configuration file
     parser = ConfigParser()
@@ -110,6 +115,8 @@ def read_config(filename='config.ini'):
 
         if section == ConfigSection.E_MYSQL.value:
             g_mysql_connection = configSectionMap(section)
+        elif section == ConfigSection.E_MSSQL.value:
+            g_mssql_connection = configSectionMap(section)
         elif section == ConfigSection.E_PRICE_FILE.value:
             g_price_file = configSectionMap(section)
         elif section == ConfigSection.E_TICKER.value:
@@ -117,8 +124,8 @@ def read_config(filename='config.ini'):
         elif section == ConfigSection.E_BENCHMARK.value:
             g_benchmark = configSectionMap(section)
 
-
-
+    if g_mssql_connection:
+        g_globaldb_constr = g_mssql_connection.get('connectionstring')
 
 """
  # get section, default to mysql

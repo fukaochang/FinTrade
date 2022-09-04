@@ -1,16 +1,34 @@
-# This is a sample Python script.
-
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
-
-
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
+import os
+from Util import  SystemEnv
+from DB import  dbconnection, DBPrice
 
 
-# Press the green button in the gutter to run the script.
+def configure_ini():
+    tickers = (SystemEnv.g_tick_list[SystemEnv.ConfigSection.E_TICKER.value])
+    print( tickers)
+    print(SystemEnv.g_mssql_connection)
+    print(SystemEnv.g_mssql_connection['connectionstring'])
+    print("test_configure_ini - Done !")
+
+def database():
+    constr = SystemEnv.g_globaldb_constr
+
+    # stored proc without parameter
+    proc = "dbo.usp_Securitymaster_Sel"
+    df = dbconnection.f_pyodbc_Sel(proc, constr)
+    print(df)
+
+    # stored proc with parameter
+    proc = "dbo.usp_Securitymaster_Sel  @ticker='{0}'".format('AAPL')
+    df1 = dbconnection.f_pyodbc_Sel(proc, constr)
+    print(df1)
+
+    print("database - Done !")
+def main():
+    SystemEnv.read_config('.\config.ini')
+    # configure_ini()
+    database()
+
 if __name__ == '__main__':
-    print_hi('PyCharm')
+    main()
 
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
