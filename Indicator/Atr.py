@@ -1,6 +1,6 @@
 """
 ATR
-
+pip install TA-Lib (Library Name)
 ATR又称 Average True Range平均真实波动范围，简称ATR指标，是由J.Welles Wilder 发明的，ATR指标主要是用来衡量市场波动的强烈度，
 即为了显示市场变化率的指标。
 

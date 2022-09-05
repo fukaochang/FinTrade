@@ -31,22 +31,18 @@ Scraping Financials
 """
 
 
-def get_historical_price(tickers, db_upd=True, output_file=False)->pd.DataFrame:
+def get_historical_price(tickers=list,start_date=str, end_date=str, db_constr=str, db_upd=True, output_file=False)->pd.DataFrame:
     """
-    :return: DataFrame df_price
-    """
-    # tickers = (SystemEnv.g_tick_list[SystemEnv.ConfigSection.E_TICKER.value]).split(',')
 
-    df_price = yahoo_fin_Market_Data.get_data(tickers, index_as_date=False)
+      :param tickers:
+      :param start_date:
+      :param end_date:
+      :param db_upd:
+      :param output_file:
+      :return: pd.DataFrame
+    """
+    df_price = yahoo_fin_Market_Data.get_data(tickers,start_date, end_date, False)
     print(df_price.info())
-
-    """
-            data type datetime64[ns] -> convert dt.date ---> object
-            DataFrame- the data type of date column is datetime64[ns] 
-            In order to match the data type of DATE, it needs to do the data type conversion
-            string from timestamp : row.date.strftime('%Y-%m-%d'),
-        """
-    df_price['date'] = df_price['date'].dt.date
 
     if isinstance(tickers, (list, tuple, pd.Series, pd.Index)):
         ticker_group = df_price.groupby('ticker')
@@ -54,19 +50,21 @@ def get_historical_price(tickers, db_upd=True, output_file=False)->pd.DataFrame:
 
         for name, grp in ticker_group:
             df_price = SymbolPd.calc_atr(grp)
-            if output_file :
-                price_file = os.path.join(SystemEnv.g_price_file['sourcefolder'], name+"_historical_price.csv")
-                df_price.to_csv(price_file)
+            print(df_price.info())
+            # if output_file :
+            #     price_file = os.path.join(SystemEnv.g_price_file['sourcefolder'], name+"_historical_price.csv")
+            #     df_price.to_csv(price_file)
             if db_upd :
-                DBPrice.update_price(df_price)
+                DBPrice.update_price_atr(df_price, db_constr)
     else:
         df_price = SymbolPd.calc_atr(df_price)
-        if output_file:
-            price_file = os.path.join(SystemEnv.g_price_file['sourcefolder'], tickers + "_historical_price.csv")
-            df_price.to_csv(price_file)
+        # if output_file:
+        #     price_file = os.path.join(SystemEnv.g_price_file['sourcefolder'], tickers + "_historical_price.csv")
+        #     df_price.to_csv(price_file)
         if db_upd:
-            DBPrice.update_price(df_price)
-    # return df_price
+            DBPrice.update_price_atr(df_price, db_constr)
+
+    return df_price
 
 
 def get_balance_sheet(tickers, yearly=True,  db_upd=True, output_file=False):

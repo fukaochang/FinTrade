@@ -3,7 +3,7 @@ from datetime import datetime
 import pandas as pd
 import pyodbc
 
-
+from Util import  SystemEnv
 
 #
 # def update_price_abu(ticker, df_price):
@@ -44,7 +44,25 @@ def update_price(df_price=pd.DataFrame, constr=str):
         cursor.close()
         conn.close()
         # print("MySQL connection is closed")
+def update_price_atr(df_price=pd.DataFrame, constr=str):
 
+    try:
+        # stored proc with parameter
+        conn = pyodbc.connect(constr)
+        cursor = conn.cursor()
+        proc = "exec dbo.usp_PriceAtr_IU '{}','{}',{},{},{},{},{},{},{},{},{},{},{}"
+        for index, row in df_price.iterrows():
+           ss=  proc.format(row.ticker, row.date, row.open, row.high, row.low, row.close, row.adjclose, row.volume,
+                            row.atr21_ewm, row.atr21_ma, row.atr14_ewm, row.atr14_ma, row.returns)
+           print(ss)
+           cursor.execute(ss)
+        conn.commit()
+    except pyodbc.Error as e:
+        print("Failed to execute stored procedure: {}".format(e))
+    finally:
+        cursor.close()
+        conn.close()
+        # print("MySQL connection is closed")
 # def select_price(symbol,holding_period, start, end):
 #     try:
 #         conn = dbconnect.connect()

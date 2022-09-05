@@ -2,7 +2,7 @@ import os
 import pandas as pd
 from Util import  SystemEnv
 from DB import  dbconnection, DBPrice
-from MarketData import yahoo_fin_Market_Data
+from MarketData import yahoo_fin_Market_Data,Yahoo_FinanceData
 from Instrument import  SymbolPd
 
 def unit_test_configure_ini():
@@ -47,11 +47,27 @@ def unit_test_yahoo_finance():
 
     print ("unit_test_yahoo_finance Done.")
 
+def unit_test_yahoo_finance_atr():
+    globaldb = SystemEnv.g_globaldb_constr
+
+    # stored proc with parameter - get the tickers
+    proc = "dbo.usp_Securitymaster_Sel  @ticker='{0}'".format('AMZN')
+    df_tickers = dbconnection.f_pyodbc_Sel(proc, globaldb)
+    ls_tickers = df_tickers['Ticker'].tolist()
+    # calling yahoo finance
+    ls_tickers = ['AMZN', 'AAPL']
+    start_date = '2022-01-01'
+    end_date = '2022-08-31'
+    df_price = Yahoo_FinanceData.get_historical_price(ls_tickers,start_date,end_date, globaldb,True, False)
+    print (df_price)
+
+    print("unit_test_yahoo_finance_atr Done.")
 def main():
     SystemEnv.read_config('.\config.ini')
     # unit_test__configure_ini()
     # unit_test__database()
-    unit_test_yahoo_finance()
+    # unit_test_yahoo_finance()
+    unit_test_yahoo_finance_atr()
 
 if __name__ == '__main__':
     main()

@@ -6,7 +6,7 @@ import yahoo_fin.stock_info as si
 from functools import reduce
 
 
-def get_data(tickers, start_date=None, end_date=None, index_as_date=True, interval='1d') -> pd.DataFrame:
+def get_data(tickers, start_date=str, end_date=str, index_as_date=True, interval='1d') -> pd.DataFrame:
     """
     :param start_date:
     :param end_date:
