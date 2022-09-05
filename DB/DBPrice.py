@@ -1,8 +1,10 @@
-# from datetime import datetime
-# import pandas as pd
-# import mysql.connector
-
+import string
+from datetime import datetime
 import pandas as pd
+import pyodbc
+
+
+
 #
 # def update_price_abu(ticker, df_price):
 #     try:
@@ -21,23 +23,28 @@ import pandas as pd
 #             conn.close()
 #         # print("MySQL connection is closed")
 #
-# def update_price(df_price):
-#     try:
-#         conn = dbconnect.connect()
-#         cursor = conn.cursor()
-#         for index, row in df_price.iterrows():
-#             parameters = [row.ticker, row.date, row.open, row.high, row.low, row.close, row.adjclose,
-#                           row.returns, row.volume, row.atr21_ewm, row.atr21_ma, row.atr14_ewm, row.atr14_ma]
-#             cursor.callproc('usp_Price_IU', parameters)
-#         conn.commit()
-#     except Error as e:
-#         print("Failed to execute stored procedure: {}".format(e))
-#     finally:
-#         if conn.is_connected():
-#             cursor.close()
-#             conn.close()
-#         # print("MySQL connection is closed")
-#
+def update_price(df_price=pd.DataFrame, constr=str):
+    # for index, row in df_price.iterrows():
+    #     print("{0} {1},{2},{3}".format(row.ticker, row.date, row.close, row.close))
+
+    try:
+        # stored proc with parameter
+        conn = pyodbc.connect(constr)
+        cursor = conn.cursor()
+        proc = "exec dbo.usp_PriceAtr_IU '{}','{}',{},{},{},{},{},{}"
+        for index, row in df_price.iterrows():
+           ss=  proc.format(row.ticker, row.date, row.open, row.high, row.low, row.close, row.adjclose, row.volume)
+                          # row.returns, row.atr21_ewm, row.atr21_ma, row.atr14_ewm, row.atr14_ma)
+           print(ss)
+           cursor.execute(ss)
+        conn.commit()
+    except pyodbc.Error as e:
+        print("Failed to execute stored procedure: {}".format(e))
+    finally:
+        cursor.close()
+        conn.close()
+        # print("MySQL connection is closed")
+
 # def select_price(symbol,holding_period, start, end):
 #     try:
 #         conn = dbconnect.connect()
