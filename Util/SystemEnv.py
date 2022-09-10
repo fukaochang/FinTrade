@@ -48,13 +48,12 @@ g_project_db_dir = path.join(g_project_root, 'db')
 # 美股252天
 g_market_trade_year = 252
 
-
 g_mysql_connection = {}
 g_mssql_connection = {}
 g_price_file = {}
 g_tick_list = {}
 g_benchmark={}
-g_globaldb_constr=""
+g_globaldb_constr =""
 
 class ConfigSection(Enum):
     E_MYSQL = 'mysql'

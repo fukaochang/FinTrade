@@ -5,6 +5,42 @@ import pyodbc
 
 from Util import  SystemEnv
 
+
+
+def update_company_info(ticker,sector,industry,website,constr=str):
+    try:
+        # stored proc with parameter
+        conn = pyodbc.connect(constr)
+        cursor = conn.cursor()
+        proc = "exec dbo.usp_Securitymaster_IU '{}','{}','{}','{}'".format(ticker, sector, industry,website)
+        cursor.execute(proc)
+        conn.commit()
+    except pyodbc.Error as e:
+        print("Failed to execute stored procedure: {}".format(e))
+    finally:
+        cursor.close()
+        conn.close()
+def  update_analysts_info(ticker=str, dict_data = dict, constr=str):
+    try:
+        # stored proc with parameter
+        conn = pyodbc.connect(constr)
+        cursor = conn.cursor()
+        proc = "exec dbo.usp_Analyst_IU '{}','{}','{}','{}','{}'"
+
+        for key, df_values in dict_data.items():
+            for index, df_row in df_values.iterrows():
+                df_row.fillna(0, inplace=True)
+
+                for item, vlue in df_row[1:].items():
+                    # print("Year={},Category = {}, item={} Values={}".format(item, df_row.index[0], df_row.iloc[0], vlue))
+                    sp = proc.format(ticker,df_row.index[0],item, df_row.iloc[0], vlue)
+                    cursor.execute(sp)
+        conn.commit()
+    except pyodbc.Error as e:
+        print("Failed to execute stored procedure: {}".format(e))
+    finally:
+        cursor.close()
+        conn.close()
 #
 # def update_price_abu(ticker, df_price):
 #     try:
@@ -47,14 +83,16 @@ def update_price(df_price=pd.DataFrame, constr=str):
 def update_price_atr(df_price=pd.DataFrame, constr=str):
 
     try:
-        # stored proc with parameter
+
         conn = pyodbc.connect(constr)
         cursor = conn.cursor()
         proc = "exec dbo.usp_PriceAtr_IU '{}','{}',{},{},{},{},{},{},{},{},{},{},{}"
         for index, row in df_price.iterrows():
-           ss=  proc.format(row.ticker, row.date, row.open, row.high, row.low, row.close, row.adjclose, row.volume,
-                            row.atr21_ewm, row.atr21_ma, row.atr14_ewm, row.atr14_ma, row.returns)
-           print(ss)
+           ss=  proc.format(row.ticker, row.date, round(row.open,2), round(row.high,2), round(row.low,2),
+                            round(row.close,2), round(row.adjclose,2), round(row.volume,2),
+                            round(row.atr21_ewm,2), round(row.atr21_ma,2), round(row.atr14_ewm,2),
+                            round(row.atr14_ma,2),round(row.returns,4))
+
            cursor.execute(ss)
         conn.commit()
     except pyodbc.Error as e:
@@ -62,7 +100,7 @@ def update_price_atr(df_price=pd.DataFrame, constr=str):
     finally:
         cursor.close()
         conn.close()
-        # print("MySQL connection is closed")
+
 # def select_price(symbol,holding_period, start, end):
 #     try:
 #         conn = dbconnect.connect()
@@ -98,76 +136,76 @@ def update_price_atr(df_price=pd.DataFrame, constr=str):
 #         # print("MySQL connection is closed")
 #
 #
-# def update_balance_sheet(dict_balance_sheet):
-#
-#     try:
-#         conn = dbconnect.connect()
-#         cursor = conn.cursor()
-#
-#         for ticker, df_sheet in dict_balance_sheet.items():
-#             df_sheet.fillna(0, inplace=True)
-#             dict_sheet = df_sheet.to_dict()
-#             for endDate, row in dict_sheet.items():
-#                 # print( type(endDate)) # <class 'pandas._libs.tslibs.timestamps.Timestamp'>
-#                 dt_endDate =  endDate.to_pydatetime()
-#                 print( type(dt_endDate))
-#
-#                 for item, vlue in row.items():
-#                     parameters = [ticker, dt_endDate, item, vlue]
-#                     cursor.callproc('usp_BalanceSheet_IU', parameters)
-#
-#         conn.commit()
-#     except Error as e:
-#         print("Failed to execute stored procedure: {}".format(e))
-#     finally:
-#         if conn.is_connected():
-#             cursor.close()
-#             conn.close()
-#
-#
-# def update_income_statement(dict_income_statement):
-#
-#     try:
-#         conn = dbconnect.connect()
-#         cursor = conn.cursor()
-#
-#         for ticker, df_sheet in dict_income_statement.items():
-#             df_sheet.fillna(0, inplace=True)
-#             dict_sheet = df_sheet.to_dict()
-#             for endDate, row in dict_sheet.items():
-#                 dt_endDate =  endDate.to_pydatetime()
-#                 for item, vlue in row.items():
-#                     parameters = [ticker, dt_endDate, item, vlue]
-#                     cursor.callproc('usp_IncomeStatement_IU', parameters)
-#
-#         conn.commit()
-#     except Error as e:
-#         print("Failed to execute stored procedure: {}".format(e))
-#     finally:
-#         if conn.is_connected():
-#             cursor.close()
-#             conn.close()
-#
-#
-# def update_cash_flow(dict_cash_flow):
-#
-#     try:
-#         conn = dbconnect.connect()
-#         cursor = conn.cursor()
-#
-#         for ticker, df_sheet in dict_cash_flow.items():
-#             df_sheet.fillna(0, inplace=True)
-#             dict_sheet = df_sheet.to_dict()
-#             for endDate, row in dict_sheet.items():
-#                 dt_endDate =  endDate.to_pydatetime()
-#                 for item, vlue in row.items():
-#                     parameters = [ticker, dt_endDate, item, vlue]
-#                     cursor.callproc('usp_CashFlow_IU', parameters)
-#
-#         conn.commit()
-#     except Error as e:
-#         print("Failed to execute stored procedure: {}".format(e))
-#     finally:
-#         if conn.is_connected():
-#             cursor.close()
-#             conn.close()
+def update_balance_sheet(dict_balance_sheet,  constr=str):
+
+    try:
+        conn = pyodbc.connect(constr)
+        cursor = conn.cursor()
+
+        for ticker, df_sheet in dict_balance_sheet.items():
+            df_sheet.fillna(0, inplace=True)
+            dict_sheet = df_sheet.to_dict()
+            for endDate, row in dict_sheet.items():
+                # print( type(endDate)) # <class 'pandas._libs.tslibs.timestamps.Timestamp'>
+                dt_endDate =  endDate.to_pydatetime()
+                print( type(dt_endDate))
+
+                for item, vlue in row.items():
+                    parameters = [ticker, dt_endDate, item, vlue]
+                    cursor.callproc('usp_BalanceSheet_IU', parameters)
+
+        conn.commit()
+    except pyodbc.Error  as e:
+        print("Failed to execute stored procedure: {}".format(e))
+    finally:
+        if conn.is_connected():
+            cursor.close()
+            conn.close()
+
+
+def update_income_statement(dict_income_statement , constr=None):
+
+    try:
+
+        conn = pyodbc.connect(constr)
+        cursor = conn.cursor()
+
+        for ticker, df_sheet in dict_income_statement.items():
+            df_sheet.fillna(0, inplace=True)
+            dict_sheet = df_sheet.to_dict()
+            proc = "exec usp_IncomeStatement_IU '{}','{}','{}',{}"
+            for endDate, row in dict_sheet.items():
+                dt_endDate =  endDate.to_pydatetime()
+                for item, vlue in row.items():
+                    proc.format(ticker, dt_endDate, item, vlue)
+
+        conn.commit()
+    except pyodbc.Error  as e:
+        print("Failed to execute stored procedure: {}".format(e))
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def update_cash_flow(dict_cash_flow , constr=str):
+
+    try:
+        conn = pyodbc.connect(constr)
+        cursor = conn.cursor()
+
+        for ticker, df_sheet in dict_cash_flow.items():
+            df_sheet.fillna(0, inplace=True)
+            dict_sheet = df_sheet.to_dict()
+            for endDate, row in dict_sheet.items():
+                dt_endDate =  endDate.to_pydatetime()
+                for item, vlue in row.items():
+                    parameters = [ticker, dt_endDate, item, vlue]
+                    cursor.callproc('usp_CashFlow_IU', parameters)
+
+        conn.commit()
+    except pyodbc.Error  as e:
+        print("Failed to execute stored procedure: {}".format(e))
+    finally:
+        if conn.is_connected():
+            cursor.close()
+            conn.close()

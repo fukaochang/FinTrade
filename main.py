@@ -2,7 +2,7 @@ import os
 import pandas as pd
 from Util import  SystemEnv
 from DB import  dbconnection, DBPrice
-from MarketData import yahoo_fin_Market_Data,Yahoo_FinanceData
+from MarketData import Yahoo_fin_Library,Yahoo_FinanceData
 from Instrument import  SymbolPd
 
 def unit_test_configure_ini():
@@ -38,7 +38,7 @@ def unit_test_yahoo_finance():
     ls_tickers=['AMZN', 'AAPL']
     start_date = '2022-01-01'
     end_date = '2022-08-31'
-    df_price = yahoo_fin_Market_Data.get_data(ls_tickers, start_date, end_date, index_as_date=False, interval='1d')
+    df_price = Yahoo_fin_Library.get_data(ls_tickers, start_date, end_date, index_as_date=False, interval='1d')
 
     # print(df_price.info())
     print( df_price)
@@ -59,15 +59,44 @@ def unit_test_yahoo_finance_atr():
     start_date = '2022-01-01'
     end_date = '2022-08-31'
     df_price = Yahoo_FinanceData.get_historical_price(ls_tickers,start_date,end_date, globaldb,True, False)
-    print (df_price)
+    # print (df_price)
 
     print("unit_test_yahoo_finance_atr Done.")
+
+def unit_test_yahoo_fundamental_data():
+    yearly = False
+    db_upd = True
+    output_file = True
+    ls_tickers = ['BRK-B']
+
+    # ls_tickers = ['AMZN', 'AAPL',  'BA', 'BRK-B']
+    ls_tickers =['ABNB', 'STEM', 'MSTR', 'NCTy', 'OPEN', 'BLNK', 'TSLA', 'NVDA','MSFT', 'BABA', 'GOOG', 'GOOGL']
+    ls_tickers = ['SPY']
+    Yahoo_FinanceData.get_company_info(ls_tickers, SystemEnv.g_globaldb_constr)
+
+
+
+    # the following functions completely tests
+
+
+    # Yahoo_FinanceData.get_analysts_info('AMZN', SystemEnv.g_globaldb_constr)
+    # Yahoo_FinanceData.get_balance_sheet(ls_tickers, yearly, SystemEnv.g_globaldb_constr, db_upd, output_file)
+    #Yahoo_FinanceData.get_income_statement(ls_tickers, yearly, SystemEnv.g_globaldb_constr, db_upd, output_file)
+    # Yahoo_FinanceData.get_cash_flow(ls_tickers, yearly,  SystemEnv.g_globaldb_constr, db_upd, output_file)
+
 def main():
+
     SystemEnv.read_config('.\config.ini')
+    # print("  SystemEnv.read_config('.\config.ini')..........")
+
+    unit_test_yahoo_fundamental_data()
+
+    # the following functions completely tests
     # unit_test__configure_ini()
     # unit_test__database()
     # unit_test_yahoo_finance()
-    unit_test_yahoo_finance_atr()
+    # unit_test_yahoo_finance_atr()
+    # unit_test_yahoo_fundamental_data()
 
 if __name__ == '__main__':
     main()
