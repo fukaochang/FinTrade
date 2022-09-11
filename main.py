@@ -4,6 +4,9 @@ from Util import  SystemEnv
 from DB import  dbconnection, DBPrice
 from MarketData import Yahoo_fin_Library,Yahoo_FinanceData
 from Instrument import  SymbolPd
+import warnings
+
+warnings.filterwarnings("ignore")
 
 def unit_test_configure_ini():
     tickers = (SystemEnv.g_tick_list[SystemEnv.ConfigSection.E_TICKER.value])
@@ -67,18 +70,19 @@ def unit_test_yahoo_fundamental_data():
     yearly = False
     db_upd = True
     output_file = True
-    ls_tickers = ['BRK-B']
+    # ls_tickers = ['BRK-B']
 
-    # ls_tickers = ['AMZN', 'AAPL',  'BA', 'BRK-B']
-    ls_tickers =['ABNB', 'STEM', 'MSTR', 'NCTy', 'OPEN', 'BLNK', 'TSLA', 'NVDA','MSFT', 'BABA', 'GOOG', 'GOOGL']
-    ls_tickers = ['SPY']
-    Yahoo_FinanceData.get_company_info(ls_tickers, SystemEnv.g_globaldb_constr)
+
+    ls_tickers =[ 'MSTR', 'NCTy', 'OPEN', 'BLNK','SPY', 'TSLA', 'NVDA','MSFT', 'BABA', 'GOOG', 'GOOGL','META','NIO','PDD', 'RIVIN','V','NVDA','SPY']
+    ls_tickers = ['META', 'NIO', 'PDD', 'RIVIN', 'V', 'NVDA']
+    ls_tickers = ['AMZN']
+    Yahoo_FinanceData.get_stats(ls_tickers, SystemEnv.g_globaldb_constr)
 
 
 
     # the following functions completely tests
 
-
+    # Yahoo_FinanceData.get_company_info(ls_tickers, SystemEnv.g_globaldb_constr)
     # Yahoo_FinanceData.get_analysts_info('AMZN', SystemEnv.g_globaldb_constr)
     # Yahoo_FinanceData.get_balance_sheet(ls_tickers, yearly, SystemEnv.g_globaldb_constr, db_upd, output_file)
     #Yahoo_FinanceData.get_income_statement(ls_tickers, yearly, SystemEnv.g_globaldb_constr, db_upd, output_file)

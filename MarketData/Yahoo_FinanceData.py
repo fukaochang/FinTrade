@@ -57,28 +57,81 @@ def get_analysts_info(ticker=str,db_constr=str) -> dict:
     # display_dictionary(dict_analysts_info)
     DBPrice.update_analysts_info(ticker, dict_analysts_info, db_constr)
 
-def get_company_info(tickers=list, db_constr=str) -> dict:
-
+def get_company_info(tickers=list, db_constr=str):
+    """
+    Invalid Ticker will cause Exception
+    :param tickers:
+    :param db_constr:
+    :return:
+    """
     if not isinstance(tickers, list):
         raise TypeError
-
-    dict_data = {ticker: si.get_company_info(ticker) for ticker in tickers}
+    try:
+        dict_data = {ticker: si.get_company_info(ticker) for ticker in tickers}
+    except Exception as e:
+        print("Tickers {} : Invalid, get_company_info : {}".format(tickers, e))
+        return
 
     if isinstance(tickers, (list, tuple, pd.Series, pd.Index)):
         for ticker,df in dict_data.items():
             print("Ticker ={}".format(ticker))
-            print(type(df))
+            # print(type(df))
+            # print(df.index)
+            # print(df.index.isin(['sector', 'industry', 'website']).tolist())
+            # print(df.index.isin(['sector', 'industry', 'website']).any())
+            if df.index.isin(['sector', 'industry', 'website']).any():
+                # for index, row in df.iterrows():
+                #     print("index={}, value={}".format(index, row['Value']))
+                sector = df.loc['sector','Value']
+                industry = df.loc['industry','Value']
+                website =  df.loc['website','Value']
+                print("Ticker ={}, Sector={}, Industry={}, WebSite={}".format(ticker,sector,industry,website) )
+                DBPrice.update_company_info(ticker.upper(),sector,industry,website,db_constr)
+            else:
+                print("Ticker ={} does not have the company information".format(ticker))
+
+def get_stats(tickers=list, db_constr=str):
+    if not isinstance(tickers, list):
+        raise TypeError
+
+    try:
+        dict_data = {ticker: si.get_stats(ticker) for ticker in tickers}
+
+        date_Fiscal_Year_Ends ='Fiscal Year Ends'
+        date_Last_Split_Date ='Last Split Date 3'
+        date_Most_Recent_Quarter = 'Most Recent Quarter (mrq)'
+
+        for ticker, df in dict_data.items():
+
+            FiscalYearEnds = df.loc[df['Attribute'] == date_Fiscal_Year_Ends]['Value'].iloc[0]
+            print("Fiscal Year Ends = {}".format(  FiscalYearEnds))
+            LastSplitDate = df.loc[df['Attribute'] == date_Last_Split_Date]['Value'].iloc[0]
+            print("Last_Split_Date = {}".format(LastSplitDate))
+            MostRecentQuarter = df.loc[df['Attribute'] == date_Most_Recent_Quarter]['Value'].iloc[0]
+            print("Most Recent Quarter = {}".format(MostRecentQuarter))
+
             for index, row in df.iterrows():
-                # print("index={}, value={}".format(index, row['Value']))
-                # Checking if multiple indexes exist
-                if df.index.isin(['sector', 'industry','website']).any():
-                    sector = df.loc['sector','Value']
-                    industry = df.loc['industry','Value']
-                    website =  df.loc['website','Value']
-                    print("Ticker ={}, Sector={}, Industry={}, WebSite={}".format(ticker,sector,industry,website) )
-                    DBPrice.update_company_info(ticker.upper(),sector,industry,website,db_constr)
-                else:
-                    print("Ticker ={} does not have the company information".format(ticker))
+                print("item ={}, value =  {}".format(row['Attribute'], row['Value']))
+                DBPrice.update_stats(ticker,MostRecentQuarter, row['Attribute'],row['Value'], db_constr)
+
+    except Exception as e:
+        print("Tickers {} : Invalid, get_stats : {}".format(tickers, e))
+        return
+
+
+
+        # print(df.index.isin(['sector', 'industry', 'website']).tolist())
+        # print(df.index.isin(['sector', 'industry', 'website']).any())
+        # if df.index.isin(['sector', 'industry', 'website']).any():
+        #     # for index, row in df.iterrows():
+        #     #     print("index={}, value={}".format(index, row['Value']))
+        #     sector = df.loc['sector', 'Value']
+        #     industry = df.loc['industry', 'Value']
+        #     website = df.loc['website', 'Value']
+        #     print("Ticker ={}, Sector={}, Industry={}, WebSite={}".format(ticker, sector, industry, website))
+        #     DBPrice.update_company_info(ticker.upper(), sector, industry, website, db_constr)
+        # else:
+        #     print("Ticker ={} does not have the company information".format(ticker))
 
 
 def get_historical_price(tickers=list,start_date=str, end_date=str, db_constr=str, db_upd=True, output_file=False)->pd.DataFrame:

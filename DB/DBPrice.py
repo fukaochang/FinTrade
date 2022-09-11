@@ -5,7 +5,32 @@ import pyodbc
 
 from Util import  SystemEnv
 
+def update_stats_category_info(category=str,itemname=str,constr=str):
+    try:
+        conn = pyodbc.connect(constr)
+        cursor = conn.cursor()
+        proc = "exec dbo.usp_Stats_Category_IU '{}','{}'".format(category, itemname)
+        cursor.execute(proc)
+        conn.commit()
+    except pyodbc.Error as e:
+        print("Failed to execute stored procedure: {}".format(e))
+    finally:
+        cursor.close()
+        conn.close()
 
+
+def update_stats(ticker=str, yearQty=str, itemname=str, itemvalue=str, constr=str):
+    try:
+        conn = pyodbc.connect(constr)
+        cursor = conn.cursor()
+        proc = "exec dbo.usp_Stats_IU '{}','{}','{}', {}".format(ticker, yearQty, itemname, itemvalue)
+        cursor.execute(proc)
+        conn.commit()
+    except pyodbc.Error as e:
+        print("Failed to execute stored procedure: {}".format(e))
+    finally:
+        cursor.close()
+        conn.close()
 
 def update_company_info(ticker,sector,industry,website,constr=str):
     try:
