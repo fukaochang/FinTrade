@@ -90,6 +90,37 @@ def get_company_info(tickers=list, db_constr=str):
             else:
                 print("Ticker ={} does not have the company information".format(ticker))
 
+def get_stats_valuation(tickers=list, db_constr=str):
+    if not isinstance(tickers, list):
+        print("Type Error")
+        raise TypeError
+
+    try:
+        dict_data = {ticker: si.get_stats_valuation(ticker) for ticker in tickers}
+
+        for ticker, df in dict_data.items():
+            # df = df.T
+            # print(type(df))
+            # print(df.columns)
+            len_col = len(df.columns)
+            for i in range(len_col):
+                print("column = {}".format(df.columns[i]))
+            # print(df.index.values)
+            for index, row in df.iterrows():
+                # print(type(row))
+                print("index = {}, itemname={}".format( index, row[0] ) )
+
+                for i in range(len(row)):
+                    print("date ={} , itemname={}, itemvalue={}".format(df.columns[i], row[0],row[i]))
+
+                # print("{} {} {}".format( index, columns[1],row[0], row[1]))
+            #     DBPrice.update_stats(ticker, MostRecentQuarter, row['Attribute'], row['Value'], db_constr)
+            # df_t = df.T
+            # print (df_t)
+    except Exception as e:
+        print("Tickers {} : Invalid, get_stats_valuation : {}".format(tickers, e))
+        return
+
 def get_stats(tickers=list, db_constr=str):
     if not isinstance(tickers, list):
         raise TypeError
@@ -111,7 +142,7 @@ def get_stats(tickers=list, db_constr=str):
             print("Most Recent Quarter = {}".format(MostRecentQuarter))
 
             for index, row in df.iterrows():
-                print("item ={}, value =  {}".format(row['Attribute'], row['Value']))
+                # print("item ={}, value =  {}".format(row['Attribute'], row['Value']))
                 DBPrice.update_stats(ticker,MostRecentQuarter, row['Attribute'],row['Value'], db_constr)
 
     except Exception as e:

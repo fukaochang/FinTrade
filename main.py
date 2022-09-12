@@ -73,15 +73,15 @@ def unit_test_yahoo_fundamental_data():
     # ls_tickers = ['BRK-B']
 
 
-    ls_tickers =[ 'MSTR', 'NCTy', 'OPEN', 'BLNK','SPY', 'TSLA', 'NVDA','MSFT', 'BABA', 'GOOG', 'GOOGL','META','NIO','PDD', 'RIVIN','V','NVDA','SPY']
-    ls_tickers = ['META', 'NIO', 'PDD', 'RIVIN', 'V', 'NVDA']
-    ls_tickers = ['AMZN']
-    Yahoo_FinanceData.get_stats(ls_tickers, SystemEnv.g_globaldb_constr)
-
+    # ls_tickers =[ 'MSTR', 'NCTy', 'OPEN', 'BLNK','SPY', 'TSLA', 'NVDA','MSFT', 'BABA', 'GOOG', 'GOOGL','META','NIO','PDD', 'RIVIN','V','NVDA','SPY']
+    # ls_tickers = ['META', 'NIO', 'PDD', 'RIVIN', 'V', 'NVDA']
+    ls_tickers = ['AMZN',]
+    Yahoo_FinanceData.get_stats_valuation(ls_tickers, SystemEnv.g_globaldb_constr)
 
 
     # the following functions completely tests
 
+    # Yahoo_FinanceData.get_stats(ls_tickers, SystemEnv.g_globaldb_constr)
     # Yahoo_FinanceData.get_company_info(ls_tickers, SystemEnv.g_globaldb_constr)
     # Yahoo_FinanceData.get_analysts_info('AMZN', SystemEnv.g_globaldb_constr)
     # Yahoo_FinanceData.get_balance_sheet(ls_tickers, yearly, SystemEnv.g_globaldb_constr, db_upd, output_file)

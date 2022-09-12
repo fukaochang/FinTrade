@@ -23,7 +23,7 @@ def update_stats(ticker=str, yearQty=str, itemname=str, itemvalue=str, constr=st
     try:
         conn = pyodbc.connect(constr)
         cursor = conn.cursor()
-        proc = "exec dbo.usp_Stats_IU '{}','{}','{}', {}".format(ticker, yearQty, itemname, itemvalue)
+        proc = "exec dbo.usp_Stats_IU '{}','{}','{}', '{}'".format(ticker, yearQty, itemname, itemvalue)
         cursor.execute(proc)
         conn.commit()
     except pyodbc.Error as e:
