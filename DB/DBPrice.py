@@ -2,8 +2,115 @@ import string
 from datetime import datetime
 import pandas as pd
 import pyodbc
-
 from Util import  SystemEnv
+
+
+def update_Revenue_Earnings_EPS(ticker,period ,yrQtr , itemname, itemvalue , constr=str):
+    """
+    Table Revenue_Earnings_EPS - (Year or Year Quarter, Revenue, Earnings,, EPS_Actual,EPS_Estimate)
+    :param ticker:
+    :param earningsdate:
+    :param itemname:
+    :param itemvalue:
+    :param constr:
+    :return:
+    """
+    try:
+        conn = pyodbc.connect(constr)
+        cursor = conn.cursor()
+        proc = "exec dbo.[usp_Revenue_Earnings_EPS_IU] '{}','{}','{}','{}', {} ".format(ticker,period, yrQtr,itemname,itemvalue )
+        cursor.execute(proc)
+        conn.commit()
+    except pyodbc.Error as e:
+        print("{} ,{}, {}, {}, {}".format(ticker,period, yrQtr,itemname,itemvalue ))
+        print("Failed to execute stored procedure update_Revenue_Earnings_EPS : {}".format(e))
+    finally:
+        cursor.close()
+        conn.close()
+
+def update_EPS_history(ticker, earningsdate, itemname, itemvalue , constr=str):
+    """
+    Table Earnings_history_pivot - (EarningsDate,EPS_Estimate, EPS_Actual,EPS_Surprise_Pct)
+    :param ticker:
+    :param earningsdate:
+    :param itemname:
+    :param itemvalue:
+    :param constr:
+    :return:
+    """
+    try:
+        conn = pyodbc.connect(constr)
+        cursor = conn.cursor()
+        proc = "exec dbo.[usp_EPS_History_IU] '{}','{}','{}','{}' ".format(ticker, earningsdate,itemname,itemvalue )
+        cursor.execute(proc)
+        conn.commit()
+    except pyodbc.Error as e:
+        print("{} ,{}, {}, {}".format(ticker, earningsdate, itemname, itemvalue))
+        print("Failed to execute stored procedure update_EPS_history : {}".format(e))
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def update_next_earnings_date(ticker, earningsdate, constr=str):
+    """
+    Table Earnings_Date(Ticker, Earning_Date)
+    :param ticker:
+    :param earningsdate:
+    :param constr:
+    :return:
+    """
+    try:
+        conn = pyodbc.connect(constr)
+        cursor = conn.cursor()
+        proc = "exec dbo.[usp_EarningsDate_IU] '{}','{}' ".format(ticker, earningsdate)
+        cursor.execute(proc)
+        conn.commit()
+    except pyodbc.Error as e:
+        print("Failed to execute stored procedure update_next_earnings_date : {}".format(e))
+    finally:
+        cursor.close()
+        conn.close()
+def update_daily_quote_table(ticker, itemname, itemvalue, constr=str):
+    try:
+        conn = pyodbc.connect(constr)
+        cursor = conn.cursor()
+        print("{}, {}, {}".format(ticker, itemname, itemvalue))
+        proc = "exec dbo.[usp_Daily_Quote_Table_IU] '{}','{}','{}' ".format(ticker, itemname, itemvalue)
+        cursor.execute(proc)
+        conn.commit()
+    except pyodbc.Error as e:
+        print("Failed to execute stored procedure update_daily_quote_table : {}".format(e))
+    finally:
+        cursor.close()
+        conn.close()
+def update_daily_quote(ticker, itemname, itemvalue, constr=str):
+    try:
+        conn = pyodbc.connect(constr)
+        cursor = conn.cursor()
+        print("{}, {}, {}".format(ticker, itemname, itemvalue))
+        proc = "exec dbo.[usp_Daily_Quote_IU] '{}','{}','{}' ".format(ticker, itemname, itemvalue)
+        cursor.execute(proc)
+        conn.commit()
+    except pyodbc.Error as e:
+        print("Failed to execute stored procedure update_daily_quote : {}".format(e))
+    finally:
+        cursor.close()
+        conn.close()
+def update_stats_valuation(ticker=str, datequarter=str, itemname=str, itemvalue=str, constr=str):
+    try:
+        conn = pyodbc.connect(constr)
+        cursor = conn.cursor()
+
+        proc = "exec dbo.[usp_Stats_Valuation_IU] '{}','{}','{}','{}' ".format(ticker, datequarter, itemname, itemvalue)
+        cursor.execute(proc)
+        conn.commit()
+    except pyodbc.Error as e:
+        print("Failed to execute stored procedure: {}".format(e))
+    finally:
+        cursor.close()
+        conn.close()
+
 
 def update_stats_category_info(category=str,itemname=str,constr=str):
     try:
