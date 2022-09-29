@@ -51,7 +51,6 @@ def update_EPS_history(ticker, earningsdate, itemname, itemvalue , constr=str):
         cursor.close()
         conn.close()
 
-
 def update_next_earnings_date(ticker, earningsdate, constr=str):
     """
     Table Earnings_Date(Ticker, Earning_Date)
@@ -110,8 +109,6 @@ def update_stats_valuation(ticker=str, datequarter=str, itemname=str, itemvalue=
     finally:
         cursor.close()
         conn.close()
-
-
 def update_stats_category_info(category=str,itemname=str,constr=str):
     try:
         conn = pyodbc.connect(constr)
@@ -124,7 +121,6 @@ def update_stats_category_info(category=str,itemname=str,constr=str):
     finally:
         cursor.close()
         conn.close()
-
 
 def update_stats(ticker=str, yearQty=str, itemname=str, itemvalue=str, constr=str):
     try:
@@ -294,7 +290,6 @@ def update_balance_sheet(dict_balance_sheet,  constr=str):
             cursor.close()
             conn.close()
 
-
 def update_income_statement(dict_income_statement , constr=None):
 
     try:
@@ -317,7 +312,6 @@ def update_income_statement(dict_income_statement , constr=None):
     finally:
         cursor.close()
         conn.close()
-
 
 def update_cash_flow(dict_cash_flow , constr=str):
 

@@ -7,6 +7,7 @@ from Instrument import SymbolPd
 from DB import DBPrice
 from MarketData import Yahoo_fin_Library
 import yahoo_fin.stock_info as si
+from yahoo_fin import news
 from functools import reduce
 
 def read_price_file():
@@ -50,9 +51,30 @@ def display_dictionary( dict_data):
             # for item, vlue in df_row[1:].items():
             #     print("Year={},Category = {}, item={} Values={}".format(item, df_row.index[0],df_row.iloc[0], vlue))
 
+def get_news(ticker):
+    """
+    import feedparser
+
+    yf_rss_url = 'https://feeds.finance.yahoo.com/rss/2.0/headline?s=%s&region=US&lang=en-US'
+    feed = feedparser.parse(yf_rss_url % ticker)
+
+    return feed.entries
+
+    :param ticker:
+    :return:
+    """
+    data = news.get_yf_rss(ticker)
+    # print (type(data))
+
+    for item in data:
+        print("{}".format(item))
+    # print(" Ticker {} , {}".format(ticker,data))
+
 def get_earnings(tickers=list, db_constr=str):
     """
     NOTE : Finance’s financials page (Income Statemen, Balance sheet, Cash flow)
+            Returns a dictionary with quarterly actual vs. estimated earnings per share,
+                    quarterly revenue / earnings data, and yearly revenue / earnings data.
     :param tickers:
     :param db_constr:
     :return:
@@ -63,15 +85,15 @@ def get_earnings(tickers=list, db_constr=str):
     try:
         dict_data = {ticker: si.get_earnings(ticker) for ticker in tickers}
         for ticker, dic_stmt in dict_data.items():
-            print("Ticker {}  ------------".format(ticker))
+            # print("Ticker {}  ------------".format(ticker))
             for itemname, df in  dic_stmt.items():
                 period = 'quarterly' if 'quarterly' in itemname else 'yearly'
-                print("\tPeriod {} = {} ------------".format(period, itemname ))
+                # print("\tPeriod {} = {} ------------".format(period, itemname ))
                 for index, row in df.iterrows():
                     for i in range(1, len(row)):
                         if  period == 'quarterly':
                             quarter=row[0][2:]+row[0][0:2]
-                            print(quarter)
+                            # print(quarter)
                         # print(" Date {} {}, {} = {}".format(df.columns[0],
                         #                             row[0] if period != 'quarterly' else row[0][2:]+row[0][0:2],
                         #                             df.columns[i], row[i]))
@@ -466,6 +488,44 @@ def get_historical_price(tickers=list,start_date=str, end_date=str, db_constr=st
             DBPrice.update_price_atr(df_price, db_constr)
 
     return df_price
+
+# def get_dividends()
+    """
+    Downloads historical dividend data of a stock into a pandas data frame.
+    """
+# def get_splits()
+
+def get_financials(tickers, yearly=True, quarterly=True, db_constr=str, db_upd=True, output_file=False):
+    """
+        Note: more efficiently extract balance sheets, cash flows, and income statements for the same ticker
+                all at once
+                Returns a dictionary with the following keys:
+
+                If yearly = True:
+
+                yearly_income_statement
+                yearly_balance_sheet
+                yearly_cash_flow
+
+
+                If quarterly = True:
+
+                quarterly_income_statement
+                quarterly_balance_sheet
+                quarterly_cash_flow
+    :return:
+    """
+    dict_data = si.get_financials(tickers,yearly,quarterly)
+    for key, df_values in dict_data.items():
+        print("------key = {}, value =  {} col = {}".format(key, df_values.index, df_values.columns ))
+        # display_dataframe(df_values)
+            # print("Category= {}-----".format(key))
+            # print("columns = {}-----".format(df_values.columns))
+            # for index, df_row in df_values.iterrows():
+            #     print("--Index = {}, Item {}".format(index,df_row))
+                # df_row.fillna(0, inplace=True)
+                # for item, vlue in df_row[1:].items():
+                #     print("Year={},Category = {}, item={} Values={}".format(item, df_row.index[0],df_row.iloc[0], vlue))
 
 
 def get_balance_sheet(tickers, yearly=True, db_constr=str, db_upd=True, output_file=False) -> dict:
