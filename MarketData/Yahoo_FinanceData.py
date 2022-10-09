@@ -70,253 +70,8 @@ def get_news(ticker):
         print("{}".format(item))
     # print(" Ticker {} , {}".format(ticker,data))
 
-def get_earnings(tickers=list, db_constr=str):
-    """
-    NOTE : Finance’s financials page (Income Statemen, Balance sheet, Cash flow)
-            Returns a dictionary with quarterly actual vs. estimated earnings per share,
-                    quarterly revenue / earnings data, and yearly revenue / earnings data.
-    :param tickers:
-    :param db_constr:
-    :return:
-    """
-    if not isinstance(tickers, list):
-        raise TypeError
 
-    try:
-        dict_data = {ticker: si.get_earnings(ticker) for ticker in tickers}
-        for ticker, dic_stmt in dict_data.items():
-            # print("Ticker {}  ------------".format(ticker))
-            for itemname, df in  dic_stmt.items():
-                period = 'quarterly' if 'quarterly' in itemname else 'yearly'
-                # print("\tPeriod {} = {} ------------".format(period, itemname ))
-                for index, row in df.iterrows():
-                    for i in range(1, len(row)):
-                        if  period == 'quarterly':
-                            quarter=row[0][2:]+row[0][0:2]
-                            # print(quarter)
-                        # print(" Date {} {}, {} = {}".format(df.columns[0],
-                        #                             row[0] if period != 'quarterly' else row[0][2:]+row[0][0:2],
-                        #                             df.columns[i], row[i]))
-                        DBPrice.update_Revenue_Earnings_EPS(ticker,period
-                                                            ,row[0] if period != 'quarterly' else row[0][2:]+row[0][0:2]
-                                                            , df.columns[i], row[i], db_constr)
-
-        print("Done...............")
-    except Exception as e:
-        print("Tickers {} : Invalid, get_earnings : {}".format(tickers, e))
-        return
-
-def get_earnings_for_date(earning_date,db_constr=str):
-    """
-    Note : Geta a list of ticker, its corresponding EPS estimate, and the time of the earnings release.
-            on a specific Earning date
-    Frequency : Daily
-    :param earnings_date:
-    :param db_constr:
-    :return:
-    """
-
-    try:
-        lst = si.get_earnings_for_date(earning_date)
-        for dic in lst:
-            if (dic['epsestimate'] is None) and  (dic['epsactual'] is None) and (dic['epssurprisepct'] is None):
-                continue
-            ticker =  dic['ticker']
-            earningsdate = dic['startdatetime']
-            for itemname, itemvalue in dic.items():
-                if 'eps' in itemname:
-                    # print("{} ,{}, {}, {}".format(ticker, earningsdate, itemname, itemvalue))
-                    DBPrice.update_EPS_history(ticker, earningsdate, itemname, itemvalue, db_constr)
-
-
-    except Exception as e:
-        print("Tickers {} : Invalid,get_earnings_for_date : {}".format(tickers, e))
-        return
-
-def get_earnings_history(tickers=list, db_constr=str):
-    """
-    Note:  a list of dictionaries with QUARTERLY actual vs. estimated earnings per share
-         along with dates of previous earnings releases.
-    Frequecny : QUARTERLY
-    :param tickers:
-    :param db_constr:
-    :return:
-    """
-    if not isinstance(tickers, list):
-        raise TypeError
-
-    try:
-        dict_data = {ticker: si.get_earnings_history(ticker) for ticker in tickers}
-        for ticker, lst in dict_data.items():
-            print("Ticker {} , type = ------------".format(ticker,type(lst)))
-            for dic_values in lst:
-                earningsdate =  dic_values['startdatetime']
-                for itemname,itemvalue in  dic_values.items():
-                    if 'eps' in itemname:
-                        print("{} ,{}, {}, {}".format(ticker,earningsdate, itemname, itemvalue))
-                        DBPrice.update_EPS_history(ticker, earningsdate, itemname, itemvalue , db_constr)
-
-    except Exception as e:
-        print("Tickers {} : Invalid, get_earnings_history : {}".format(tickers, e))
-        return
-def get_next_earnings_date(tickers=list, db_constr=str):
-    """
-    Note: Next Earning Date for a given ticker
-
-
-    :param tickers:
-    :param db_constr:
-    :return:
-    """
-    if not isinstance(tickers, list):
-        raise TypeError
-
-    try:
-        dict_data = {ticker: si.get_next_earnings_date(ticker) for ticker in tickers}
-
-        for ticker, earningsDt in dict_data.items():
-            # print("Ticker={} Next Earning Date {} ------------".format(ticker,earningsDt.strftime("%m/%d/%Y")))
-            DBPrice.update_next_earnings_date(ticker,earningsDt.strftime("%m/%d/%Y"),db_constr )
-    except Exception as e:
-        print("Tickers {} : Invalid, get_quote_data : {}".format(tickers, e))
-        return
-def get_quote_table(tickers=list, db_constr=str):
-    """
-    Yahoo Finance Summary - Frequencey : Intraday (17)
-                1y target est
-                52 week range
-                Previous close,
-                Open,
-                Ask
-                Bid
-                Quote price
-                Volume
-                Avg. volume
-                Beta (5y monthly)
-                Day's range
-                PE ratio (ttm)
-                EPS (ttm)
-                Earnings date
-                Ex-dividend date
-                Forward dividend & yield
-                Market cap
-
-    :param tickers:
-    :param db_constr:
-    :return:
-    """
-    if not isinstance(tickers, list):
-        raise TypeError
-
-    try:
-        dict_data = {ticker: si.get_quote_table(ticker,True) for ticker in tickers}
-
-        for ticker, dic in dict_data.items():
-            # print("Ticker {} ------------".format(ticker))
-            for key, df_values in dic.items():
-                # print("{}, {}, type={}".format(key.capitalize(), df_values, type(df_values)))
-                DBPrice.update_daily_quote_table(ticker, key.capitalize(), df_values, db_constr)
-
-    except Exception as e:
-        print("Tickers {} : Invalid, get_quote_data : {}".format(tickers, e))
-        return
-
-
-def get_quote_data(tickers=list, db_constr=str):
-    """
-    returns a collection of useful data on a stock ticker.
-    It returns a dictionary containing over 70 elements, including current
-        real-time price,
-        company name,
-        book value,
-        P/E,
-        Current Market State (Open / Closed),
-        Pre-Market Price (if applicable),
-        Intraday Price
-         50-day average,
-         200-day average,
-        Post-Market Price (if applicable), and more.
-         shares outstanding, and more.
-    :param tickers:
-    :param db_constr:
-    :return:
-    """
-    if not isinstance(tickers, list):
-        raise TypeError
-
-    try:
-        dict_data = {ticker: si.get_quote_data(ticker) for ticker in tickers}
-
-        for ticker, dic in dict_data.items():
-            print("Ticker {} ------------".format(ticker))
-            for key, value in dic.items():
-                print("{}, {}".format(key.capitalize(), value))
-                DBPrice.update_daily_quote(ticker, key.capitalize(),value, db_constr)
-
-    except Exception as e:
-        print("Tickers {} : Invalid, get_quote_data : {}".format(tickers, e))
-        return
-
-def get_analysts_info(tickers=list,db_constr=str) -> dict:
-    """
-       Scrapes data from the Analysts page for the input ticker from
-       Yahoo Finance (e.g. https://finance.yahoo.com/quote/NFLX/analysts?p=NFLX.
-       This includes information on Earnings estimates, EPS trends / revisions etc.
-       :param ticker:
-       :param db_constr:
-       :return: Returns a dictionary containing the tables visible on the ‘Analysts’ page.
-    """
-    # dict_analysts_info=si.get_analysts_info(ticker)
-    # display_dictionary(dict_analysts_info)
-    # DBPrice.update_analysts_info(ticker, dict_analysts_info, db_constr)
-
-    if not isinstance(tickers, list):
-        print("Type Error")
-        raise TypeError
-
-    try:
-        dict_data = {ticker: si.get_analysts_info(ticker) for ticker in tickers}
-
-        for ticker, df in dict_data.items():
-             DBPrice.update_analysts_info(ticker, df, db_constr)
-
-    except Exception as e:
-        print("Tickers {} : Invalid, get_stats_valuation : {}".format(tickers, e))
-        return
-
-def get_company_info(tickers=list, db_constr=str):
-    """
-    Invalid Ticker will cause Exception
-    :param tickers:
-    :param db_constr:
-    :return:
-    """
-    if not isinstance(tickers, list):
-        raise TypeError
-    try:
-        dict_data = {ticker: si.get_company_info(ticker) for ticker in tickers}
-    except Exception as e:
-        print("Tickers {} : Invalid, get_company_info : {}".format(tickers, e))
-        return
-
-    if isinstance(tickers, (list, tuple, pd.Series, pd.Index)):
-        for ticker,df in dict_data.items():
-            print("Ticker ={}".format(ticker))
-            # print(type(df))
-            # print(df.index)
-            # print(df.index.isin(['sector', 'industry', 'website']).tolist())
-            # print(df.index.isin(['sector', 'industry', 'website']).any())
-            if df.index.isin(['sector', 'industry', 'website']).any():
-                # for index, row in df.iterrows():
-                #     print("index={}, value={}".format(index, row['Value']))
-                sector = df.loc['sector','Value']
-                industry = df.loc['industry','Value']
-                website =  df.loc['website','Value']
-                print("Ticker ={}, Sector={}, Industry={}, WebSite={}".format(ticker,sector,industry,website) )
-                DBPrice.update_company_info(ticker.upper(),sector,industry,website,db_constr)
-            else:
-                print("Ticker ={} does not have the company information".format(ticker))
-
+#region Statistics  *****************************************
 """
 Finance Yahoo! Statistics Section
     The most important place on Yahoo! Finance to do our fundamental analysis is the Statistics section.
@@ -438,8 +193,6 @@ def get_stats(tickers=list, db_constr=str):
         print("Tickers {} : Invalid, get_stats : {}".format(tickers, e))
         return
 
-
-
         # print(df.index.isin(['sector', 'industry', 'website']).tolist())
         # print(df.index.isin(['sector', 'industry', 'website']).any())
         # if df.index.isin(['sector', 'industry', 'website']).any():
@@ -453,48 +206,149 @@ def get_stats(tickers=list, db_constr=str):
         # else:
         #     print("Ticker ={} does not have the company information".format(ticker))
 
+#endregion
 
-def get_historical_price(tickers=list,start_date=str, end_date=str, db_constr=str, db_upd=True, output_file=False)->pd.DataFrame:
+#region Quarterly ***********************************************************
+def get_earnings(tickers=list, db_constr=str):
+    """
+    NOTE : Finance’s financials page (Income Statemen, Balance sheet, Cash flow)
+            Returns a dictionary with quarterly actual vs. estimated earnings per share,
+                    quarterly revenue / earnings data, and yearly revenue / earnings data.
+    :param tickers:
+    :param db_constr:
+    :return:
+    """
+    if not isinstance(tickers, list):
+        raise TypeError
+
+    try:
+        dict_data = {ticker: si.get_earnings(ticker) for ticker in tickers}
+        for ticker, dic_stmt in dict_data.items():
+            # print("Ticker {}  ------------".format(ticker))
+            for itemname, df in  dic_stmt.items():
+                period = 'quarterly' if 'quarterly' in itemname else 'yearly'
+                # print("\tPeriod {} = {} ------------".format(period, itemname ))
+                for index, row in df.iterrows():
+                    for i in range(1, len(row)):
+                        if  period == 'quarterly':
+                            quarter=row[0][2:]+row[0][0:2]
+                            # print(quarter)
+                        # print(" Date {} {}, {} = {}".format(df.columns[0],
+                        #                             row[0] if period != 'quarterly' else row[0][2:]+row[0][0:2],
+                        #                             df.columns[i], row[i]))
+                        DBPrice.update_Revenue_Earnings_EPS(ticker,period
+                                                            ,row[0] if period != 'quarterly' else row[0][2:]+row[0][0:2]
+                                                            , df.columns[i], row[i], db_constr)
+
+        print("Done...............")
+    except Exception as e:
+        print("Tickers {} : Invalid, get_earnings : {}".format(tickers, e))
+        return
+
+def get_earnings_for_date(earning_date,db_constr=str):
+    """
+    Note : Geta a list of ticker, its corresponding EPS estimate, and the time of the earnings release.
+            on a specific Earning date
+    Frequency : Daily
+    :param earnings_date:
+    :param db_constr:
+    :return:
     """
 
-      :param tickers:
-      :param start_date:
-      :param end_date:
-      :param db_constr : ConnectionString
-      :param db_upd:
-      :param output_file:
-      :return: pd.DataFrame
+    try:
+        lst = si.get_earnings_for_date(earning_date)
+        for dic in lst:
+            if (dic['epsestimate'] is None) and  (dic['epsactual'] is None) and (dic['epssurprisepct'] is None):
+                continue
+            ticker =  dic['ticker']
+            earningsdate = dic['startdatetime']
+            for itemname, itemvalue in dic.items():
+                if 'eps' in itemname:
+                    # print("{} ,{}, {}, {}".format(ticker, earningsdate, itemname, itemvalue))
+                    DBPrice.update_EPS_history(ticker, earningsdate, itemname, itemvalue, db_constr)
+
+
+    except Exception as e:
+        print("Tickers {} : Invalid,get_earnings_for_date : {}".format(tickers, e))
+        return
+
+def get_earnings_history(tickers=list, db_constr=str):
     """
-    df_price = Yahoo_fin_Library.get_data(tickers,start_date, end_date, False)
-
-    if isinstance(tickers, (list, tuple, pd.Series, pd.Index)):
-        ticker_group = df_price.groupby('ticker')
-        # print( type(ticker_group)) #<class 'pandas.core.groupby.generic.DataFrameGroupBy'>
-
-        for name, grp in ticker_group:
-            df_price = SymbolPd.calc_atr(grp)
-            # print(df_price.info())
-            # if output_file :
-            #     price_file = os.path.join(SystemEnv.g_price_file['sourcefolder'], name+"_historical_price.csv")
-            #     df_price.to_csv(price_file)
-            if db_upd :
-                DBPrice.update_price_atr(df_price, db_constr)
-    else:
-        df_price = SymbolPd.calc_atr(df_price)
-        # if output_file:
-        #     price_file = os.path.join(SystemEnv.g_price_file['sourcefolder'], tickers + "_historical_price.csv")
-        #     df_price.to_csv(price_file)
-        if db_upd:
-            DBPrice.update_price_atr(df_price, db_constr)
-
-    return df_price
-
-# def get_dividends()
+    Note:  a list of dictionaries with QUARTERLY actual vs. estimated earnings per share
+         along with dates of previous earnings releases.
+    Frequecny : QUARTERLY
+    :param tickers:
+    :param db_constr:
+    :return:
     """
-    Downloads historical dividend data of a stock into a pandas data frame.
-    """
-# def get_splits()
+    if not isinstance(tickers, list):
+        raise TypeError
 
+    try:
+        dict_data = {ticker: si.get_earnings_history(ticker) for ticker in tickers}
+        for ticker, lst in dict_data.items():
+            print("Ticker {} , type = ------------".format(ticker,type(lst)))
+            for dic_values in lst:
+                earningsdate =  dic_values['startdatetime']
+                for itemname,itemvalue in  dic_values.items():
+                    if 'eps' in itemname:
+                        print("{} ,{}, {}, {}".format(ticker,earningsdate, itemname, itemvalue))
+                        DBPrice.update_EPS_history(ticker, earningsdate, itemname, itemvalue , db_constr)
+
+    except Exception as e:
+        print("Tickers {} : Invalid, get_earnings_history : {}".format(tickers, e))
+        return
+def get_next_earnings_date(tickers=list, db_constr=str):
+    """
+    Note: Next Earning Date for a given ticker
+
+    :param tickers:
+    :param db_constr:
+    :return:
+    """
+    if not isinstance(tickers, list):
+        raise TypeError
+
+    try:
+        dict_data = {ticker: si.get_next_earnings_date(ticker) for ticker in tickers}
+
+        for ticker, earningsDt in dict_data.items():
+            # print("Ticker={} Next Earning Date {} ------------".format(ticker,earningsDt.strftime("%m/%d/%Y")))
+            DBPrice.update_next_earnings_date(ticker,earningsDt.strftime("%m/%d/%Y"),db_constr )
+    except Exception as e:
+        print("Tickers {} : Invalid, get_quote_data : {}".format(tickers, e))
+        return
+
+def get_analysts_info(tickers=list,db_constr=str) -> dict:
+    """
+       Scrapes data from the Analysts page for the input ticker from
+       Yahoo Finance (e.g. https://finance.yahoo.com/quote/NFLX/analysts?p=NFLX.
+       This includes information on Earnings estimates, EPS trends / revisions etc.
+       :param ticker:
+       :param db_constr:
+       :return: Returns a dictionary containing the tables visible on the ‘Analysts’ page.
+    """
+    # dict_analysts_info=si.get_analysts_info(ticker)
+    # display_dictionary(dict_analysts_info)
+    # DBPrice.update_analysts_info(ticker, dict_analysts_info, db_constr)
+
+    if not isinstance(tickers, list):
+        print("Type Error")
+        raise TypeError
+
+    try:
+        dict_data = {ticker: si.get_analysts_info(ticker) for ticker in tickers}
+
+        for ticker, df in dict_data.items():
+             DBPrice.update_analysts_info(ticker, df, db_constr)
+
+    except Exception as e:
+        print("Tickers {} : Invalid, get_stats_valuation : {}".format(tickers, e))
+        return
+
+#endregion
+
+#region Quarterly , Financial Statement  ***************************************
 def get_financials(tickers, yearly=True, quarterly=True, db_constr=str, db_upd=True, output_file=False):
     """
         Note: more efficiently extract balance sheets, cash flows, and income statements for the same ticker
@@ -526,7 +380,6 @@ def get_financials(tickers, yearly=True, quarterly=True, db_constr=str, db_upd=T
                 # df_row.fillna(0, inplace=True)
                 # for item, vlue in df_row[1:].items():
                 #     print("Year={},Category = {}, item={} Values={}".format(item, df_row.index[0],df_row.iloc[0], vlue))
-
 
 def get_balance_sheet(tickers, yearly=True, db_constr=str, db_upd=True, output_file=False) -> dict:
     """
@@ -594,6 +447,191 @@ def get_cash_flow(tickers, yearly=True, db_constr=str, db_upd=True, output_file=
             df_sheet.to_csv(out_file)
 
     return dict_cash_flow
+
+#endregion Quarterly , Financial Statement
+
+#region Daily **************************************************
+def get_quote_table(tickers=list, db_constr=str):
+    """
+    Yahoo Finance Summary - Frequencey : Intraday (17)
+                1y target est
+                52 week range
+                Previous close,
+                Open,
+                Ask
+                Bid
+                Quote price
+                Volume
+                Avg. volume
+                Beta (5y monthly)
+                Day's range
+                PE ratio (ttm)
+                EPS (ttm)
+                Earnings date
+                Ex-dividend date
+                Forward dividend & yield
+                Market cap
+
+    :param tickers:
+    :param db_constr:
+    :return:
+    """
+    if not isinstance(tickers, list):
+        raise TypeError
+
+    try:
+        dict_data = {ticker: si.get_quote_table(ticker,True) for ticker in tickers}
+
+        for ticker, dic in dict_data.items():
+            # print("Ticker {} ------------".format(ticker))
+            for key, df_values in dic.items():
+                # print("{}, {}, type={}".format(key.capitalize(), df_values, type(df_values)))
+                DBPrice.update_daily_quote_table(ticker, key.capitalize(), df_values, db_constr)
+
+    except Exception as e:
+        print("Tickers {} : Invalid, get_quote_data : {}".format(tickers, e))
+        return
+def get_quote_data(tickers=list, db_constr=str):
+    """
+    returns a collection of useful data on a stock ticker.
+    It returns a dictionary containing over 70 elements, including current
+        real-time price,
+        company name,
+        book value,
+        P/E,
+        Current Market State (Open / Closed),
+        Pre-Market Price (if applicable),
+        Intraday Price
+         50-day average,
+         200-day average,
+        Post-Market Price (if applicable), and more.
+         shares outstanding, and more.
+    :param tickers:
+    :param db_constr:
+    :return:
+    """
+    if not isinstance(tickers, list):
+        raise TypeError
+
+    try:
+        dict_data = {ticker: si.get_quote_data(ticker) for ticker in tickers}
+
+        for ticker, dic in dict_data.items():
+            print("Ticker {} ------------".format(ticker))
+            for key, value in dic.items():
+                print("{}, {}".format(key.capitalize(), value))
+                DBPrice.update_daily_quote(ticker, key.capitalize(),value, db_constr)
+
+    except Exception as e:
+        print("Tickers {} : Invalid, get_quote_data : {}".format(tickers, e))
+        return
+
+#endregion Daily ***********************************************
+
+#region Once, New Ticker ************************************************
+
+def get_historical_price_year(tickers, start_year, end_year):
+    db_string = SystemEnv.g_mssql_connection.get('connectionstring')
+    no_of_year = end_year - start_year
+    for ticker in tickers:
+        i = 0
+        while i <= no_of_year :
+            start_date = "01/01/{}".format(start_year + i)
+            end_date= "12/31/{}".format(start_year + i)
+            if __debug__:
+                print("Ticker={}, Start_Date={}, End_Date={}".format(ticker,start_date,end_date))
+            try:
+                df_price = get_historical_price(ticker.split(),start_date,end_date,db_string)
+            except Exception as e:
+                print("get_historical_price_year() Error : {}".format(str(e)))
+            i = i + 1
+
+def get_historical_price(tickers=list,start_date=str, end_date=str, db_constr=str, db_upd=True, output_file=False)->pd.DataFrame:
+    """
+      :param tickers:
+      :param start_date:
+      :param end_date:
+      :param db_constr : ConnectionString
+      :param db_upd:
+      :param output_file:
+      :return: pd.DataFrame
+    """
+    if not db_constr:
+        db_constr = SystemEnv.g_mssql_connection.ConnectionString
+    try:
+        df_price = Yahoo_fin_Library.get_data(tickers,start_date, end_date, False)
+    except Exception as e:
+        print("get_historical_price () Error : {}".format(str(e)))
+        raise  e
+
+    if isinstance(tickers, (list, tuple, pd.Series, pd.Index)):
+        ticker_group = df_price.groupby('ticker')
+        # print( type(ticker_group)) #<class 'pandas.core.groupby.generic.DataFrameGroupBy'>
+
+        for name, grp in ticker_group:
+            df_price = SymbolPd.calc_atr(grp)
+            # print(df_price.info())
+            # if output_file :
+            #     price_file = os.path.join(SystemEnv.g_price_file['sourcefolder'], name+"_historical_price.csv")
+            #     df_price.to_csv(price_file)
+            if db_upd :
+                DBPrice.update_price_atr(df_price, db_constr)
+    else:
+        df_price = SymbolPd.calc_atr(df_price)
+        # if output_file:
+        #     price_file = os.path.join(SystemEnv.g_price_file['sourcefolder'], tickers + "_historical_price.csv")
+        #     df_price.to_csv(price_file)
+        if db_upd:
+            DBPrice.update_price_atr(df_price, db_constr)
+
+    return df_price
+
+def get_company_info(tickers=list, db_constr=str):
+    """
+    Invalid Ticker will cause Exception
+    :param tickers:
+    :param db_constr:
+    :return:
+    """
+    if not isinstance(tickers, list):
+        raise TypeError
+    try:
+        dict_data = {ticker: si.get_company_info(ticker) for ticker in tickers}
+    except Exception as e:
+        print("Tickers {} : Invalid, get_company_info : {}".format(tickers, e))
+        return
+
+    if isinstance(tickers, (list, tuple, pd.Series, pd.Index)):
+        for ticker,df in dict_data.items():
+            df.fillna('', inplace=True)
+            if __debug__: print("Ticker ={}".format(ticker))
+            # print(type(df))
+            # print(df.index)
+            # print(df.index.isin(['sector', 'industry', 'website']).tolist())
+            # print(df.index.isin(['sector', 'industry', 'website']).any())
+            # if df.index.isin(['sector', 'industry', 'website']).any():
+                # for index, row in df.iterrows():
+                #     print("index={}, value={}".format(index, row['Value']))
+            sector =  df.loc['sector','Value']  if 'sector' in df.index else ''
+            industry = df.loc['industry','Value'] if 'industry' in df.index else ''
+            website =  df.loc['website','Value']  if 'website' in df.index else ''
+            businessSummary = df.loc['longBusinessSummary', 'Value']  if 'longBusinessSummary' in df.index else ''
+            address1 = df.loc['address1', 'Value'] if 'address1' in df.index else ''
+            address2 = df.loc['address2', 'Value'] if 'address2' in df.index else ''
+            city = df.loc['city', 'Value'] if 'city' in df.index else ''
+            state = df.loc['state', 'Value'] if 'state' in df.index else ''
+            zipCode = df.loc['zip', 'Value'] if 'zip' in df.index else ''
+            phone = df.loc['phone', 'Value'] if 'phone' in df.index else ''
+            country =  df.loc['country', 'Value'] if 'country' in df.index else ''
+            maxAge = df.loc['maxAge', 'Value'] if 'maxAge' in df.index else ''
+
+            DBPrice.update_company_info(ticker.upper(),sector,industry,website,address1, address2,city ,state, zipCode
+                                        ,country,phone,businessSummary, db_constr)
+
+#endregion Once, New Ticker ************************************************
+
+# def new_ticker(ticker):
+
 def market_data(tickers):
     yearly=False
     db_upd=True

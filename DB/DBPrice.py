@@ -3,8 +3,8 @@ from datetime import datetime
 import pandas as pd
 import pyodbc
 from Util import  SystemEnv
-
-
+#
+# db_connection_String = SystemEnv.g_mssql_connection.ConnectionString
 def update_Revenue_Earnings_EPS(ticker,period ,yrQtr , itemname, itemvalue , constr=str):
     """
     Table Revenue_Earnings_EPS - (Year or Year Quarter, Revenue, Earnings,, EPS_Actual,EPS_Estimate)
@@ -135,12 +135,15 @@ def update_stats(ticker=str, yearQty=str, itemname=str, itemvalue=str, constr=st
         cursor.close()
         conn.close()
 
-def update_company_info(ticker,sector,industry,website,constr=str):
+def update_company_info(ticker,sector,industry,website,address1, address2,city ,state, zipCode
+                                            ,country,phone,businessSummary, db_constr):
     try:
         # stored proc with parameter
-        conn = pyodbc.connect(constr)
+        conn = pyodbc.connect(db_constr)
         cursor = conn.cursor()
-        proc = "exec dbo.usp_Securitymaster_IU '{}','{}','{}','{}'".format(ticker, sector, industry,website)
+        proc = "exec dbo.usp_Securitymaster_IU '{}','{}','{}','{}','{}','{}','{}','{}','{}','{}','{}','{}'".format(
+            ticker, sector, industry, website, address1, address2, city, state, zipCode , country, phone
+            ,businessSummary.replace("'", '"'))
         cursor.execute(proc)
         conn.commit()
     except pyodbc.Error as e:

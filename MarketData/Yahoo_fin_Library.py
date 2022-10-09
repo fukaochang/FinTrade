@@ -44,9 +44,15 @@ def get_data(tickers=list, start_date=str, end_date=str, index_as_date=True, int
     :return :  
     """
 
+    try:
+        price_data = {ticker: si.get_data(ticker.strip(), start_date, end_date, index_as_date, interval)
+                      for ticker in tickers}
+    except Exception as e:
+        print("Yahoo_fin_Library.get_data (start_date={},end_date={}) failed to get history price : {}".format(start_date,end_date, str(e)))
+        raise  e
+
     # DatetimeIndex: 10182  entries, 1980 - 12 - 12   to    2021 - 04 - 30
-    price_data = {ticker: si.get_data(ticker.strip(), start_date, end_date, index_as_date, interval)
-                  for ticker in tickers}
+
 
     combined = reduce(lambda x, y: x.append(y), price_data.values())
     # combined = reduce(lambda x, y: x.concat(y), price_data.values())

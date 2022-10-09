@@ -1,4 +1,5 @@
 import os
+import argparse
 import datetime
 import pandas as pd
 from Util import  SystemEnv
@@ -82,8 +83,6 @@ def unit_test_yahoo_fundamental_data():
     # ls_tickers = ['AMZN','TSLA']
 
 
-
-
     # -------------------------------------------------------------
     # the following functions completely tests
     # ---------------------------------------------------------------
@@ -105,12 +104,44 @@ def unit_test_yahoo_fundamental_data():
     # Yahoo_FinanceData.get_stats(ls_tickers, SystemEnv.g_globaldb_constr)
     # Yahoo_FinanceData.get_quote_table(ls_tickers, SystemEnv.g_globaldb_constr)
     # Yahoo_FinanceData.get_company_info(ls_tickers, SystemEnv.g_globaldb_constr)
-def main():
+def main(opt1=str,opt2=None,opt3=None,opt4=None):
 
-    SystemEnv.read_config('.\config.ini')
+    print("opt1={}, opt2={}".format(opt1,opt2))
+    # SystemEnv.read_config('.\config.ini')
     # print("  SystemEnv.read_config('.\config.ini')..........")
 
-    unit_test_yahoo_fundamental_data()
+    ls_tickers = ['AMZN', 'AAPL', 'MSTR', 'NCTY', 'OPEN', 'BLNK', 'TSLA', 'NVDA', 'MSFT', 'BABA', 'GOOG', 'GOOGL',
+                  'META', 'NIO', 'PDD', 'RIVN', 'V', 'NVDA']
+
+
+    if opt1 == "company_info":
+        Yahoo_FinanceData.get_company_info(opt2, SystemEnv.g_globaldb_constr)
+    elif opt1 == "quote_table":
+        Yahoo_FinanceData.get_quote_table(ls_tickers, SystemEnv.g_globaldb_constr)
+    elif opt1 == "historical_price_year":
+        Yahoo_FinanceData.get_historical_price_year(ls_tickers,opt2,opt3)
+    elif opt1 == "get_stats":
+        Yahoo_FinanceData.get_stats(ls_tickers, SystemEnv.g_globaldb_constr)
+    elif opt1 == "stats_valuation":
+        Yahoo_FinanceData.get_stats_valuation(ls_tickers, SystemEnv.g_globaldb_constr)
+    elif opt1 == "get_next_earnings_date":
+        Yahoo_FinanceData.get_next_earnings_date(ls_tickers, SystemEnv.g_globaldb_constr)
+    elif opt1 == "get_next_earnings_date":
+        Yahoo_FinanceData.get_next_earnings_date(ls_tickers, SystemEnv.g_globaldb_constr)
+    elif opt1 == "get_earnings_history":
+        Yahoo_FinanceData.get_earnings_history(ls_tickers, SystemEnv.g_globaldb_constr)
+    elif opt1 == "get_earnings_history":
+        Yahoo_FinanceData.get_earnings_history(ls_tickers, SystemEnv.g_globaldb_constr)
+    elif opt1 == "earnings_for_date":
+        Yahoo_FinanceData.get_earnings_for_date(ls_tickers, SystemEnv.g_globaldb_constr)
+    elif opt1 == "analysts_info":
+        Yahoo_FinanceData.get_earnings_for_date(ls_tickers, SystemEnv.g_globaldb_constr)
+    elif opt1 == "news":
+        Yahoo_FinanceData.get_news(opt2)
+    else:
+        print("no option")
+
+    # unit_test_yahoo_fundamental_data()
 
     # the following functions completely tests
     # unit_test__configure_ini()
@@ -120,5 +151,34 @@ def main():
     # unit_test_yahoo_fundamental_data()
 
 if __name__ == '__main__':
-    main()
+    SystemEnv.read_config('.\config.ini')
+
+
+    if __debug__:
+        # opt1="news"
+        # opt2="AMZN"
+        # opt1 = "historical_price_year"
+        # opt2=1982
+        # opt3=2001
+        # main(opt1, opt2, opt3)
+
+        opt1="company_info"
+        opt2= ['AMZN', 'AAPL', 'MSTR', 'NCTY', 'OPEN', 'BLNK', 'TSLA', 'NVDA', 'MSFT', 'BABA', 'GOOG', 'GOOGL',
+                    'META', 'NIO', 'PDD', 'RIVN', 'V', 'NVDA']
+
+        main(opt1, opt2)
+
+    else:
+        parser = argparse.ArgumentParser()
+        # Add a required, positional argument
+        parser.add_argument("opt1",
+                            choices=["company_info", "quote_table", "historical_price_year","get_stats", "stats_valuation",
+                                    "next_earnings_date","earnings_history", "earnings_for_date","earnings",
+                                     "analysts_info", "financials","news"],
+                            type=str, help="Your name")
+        parser.add_argument("opt2")
+
+        args = parser.parse_args()
+        print("opt1={}, opt2={}".format(args.opt1, args.opt2))
+        main(args.opt1, args.opt2)
 

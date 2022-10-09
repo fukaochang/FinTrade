@@ -109,7 +109,7 @@ def read_config(filename='config.ini'):
     # create parser and read ini configuration file
     parser = ConfigParser()
     parser.read(filename)
-    sections = parser.sections()
+    # sections = parser.sections()
     for section in parser.sections():
 
         if section == ConfigSection.E_MYSQL.value:
