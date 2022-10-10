@@ -58,6 +58,27 @@ def get_data(tickers=list, start_date=str, end_date=str, index_as_date=True, int
     # combined = reduce(lambda x, y: x.concat(y), price_data.values())
     return combined
 
+def get_splits(tickers=list, start_date=str, end_date=str, index_as_date=True) -> pd.DataFrame:
+    """
+    :param start_date:
+    :param end_date:
+    :param index_as_date:
+    :param tickers is a list of Equity tickers:
+    :return :
+    """
+
+    try:
+        # splits_data = {ticker: si.get_splits(ticker.strip(), start_date, end_date, index_as_date)
+        #               for ticker in tickers}
+
+        splits_data = {ticker: si.get_splits(ticker.strip()) for ticker in tickers}
+    except Exception as e:
+        print("Yahoo_fin_Library.get_splits (start_date={},end_date={}) failed to get split : {}".format(start_date,end_date, str(e)))
+        raise  e
+
+    combined = reduce(lambda x, y: x.append(y), splits_data.values())
+    return combined
+
 def get_balance_sheet(tickers=list, yearly=True):
     dict_data = {ticker: si.get_balance_sheet(ticker,yearly) for ticker in tickers}
     return dict_data

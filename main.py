@@ -110,10 +110,11 @@ def main(opt1=str,opt2=None,opt3=None,opt4=None):
     # SystemEnv.read_config('.\config.ini')
     # print("  SystemEnv.read_config('.\config.ini')..........")
 
-    ls_tickers = ['AMZN', 'AAPL', 'MSTR', 'NCTY', 'OPEN', 'BLNK', 'TSLA', 'NVDA', 'MSFT', 'BABA', 'GOOG', 'GOOGL',
-                  'META', 'NIO', 'PDD', 'RIVN', 'V', 'NVDA']
+    # ls_tickers = ['AMZN', 'AAPL', 'MSTR', 'NCTY', 'OPEN', 'BLNK', 'TSLA', 'NVDA', 'MSFT', 'BABA', 'GOOG', 'GOOGL',
+    #               'META', 'NIO', 'PDD', 'RIVN', 'V', 'NVDA']
 
-
+    # ls_tickers=['^GSPC']
+    ls_tickers = ['^IXIC']
     if opt1 == "company_info":
         Yahoo_FinanceData.get_company_info(opt2, SystemEnv.g_globaldb_constr)
     elif opt1 == "quote_table":
@@ -136,6 +137,8 @@ def main(opt1=str,opt2=None,opt3=None,opt4=None):
         Yahoo_FinanceData.get_earnings_for_date(ls_tickers, SystemEnv.g_globaldb_constr)
     elif opt1 == "analysts_info":
         Yahoo_FinanceData.get_earnings_for_date(ls_tickers, SystemEnv.g_globaldb_constr)
+    elif opt1 == "get_splits":
+        Yahoo_FinanceData.get_splits( opt2)
     elif opt1 == "news":
         Yahoo_FinanceData.get_news(opt2)
     else:
@@ -157,23 +160,26 @@ if __name__ == '__main__':
     if __debug__:
         # opt1="news"
         # opt2="AMZN"
-        # opt1 = "historical_price_year"
-        # opt2=1982
-        # opt3=2001
-        # main(opt1, opt2, opt3)
 
-        opt1="company_info"
-        opt2= ['AMZN', 'AAPL', 'MSTR', 'NCTY', 'OPEN', 'BLNK', 'TSLA', 'NVDA', 'MSFT', 'BABA', 'GOOG', 'GOOGL',
-                    'META', 'NIO', 'PDD', 'RIVN', 'V', 'NVDA']
+        # opt1 = "historical_price_year"
+        opt1 = "get_splits"
+        opt2 = ['AMZN', 'AAPL', 'MSTR', 'NCTY', 'OPEN', 'BLNK', 'TSLA', 'NVDA', 'MSFT', 'BABA', 'GOOG', 'GOOGL',
+                      'META', 'NIO', 'PDD', 'RIVN', 'V', 'NVDA']
 
         main(opt1, opt2)
+
+        # opt1="company_info"
+        # opt2= ['AMZN', 'AAPL', 'MSTR', 'NCTY', 'OPEN', 'BLNK', 'TSLA', 'NVDA', 'MSFT', 'BABA', 'GOOG', 'GOOGL',
+        #             'META', 'NIO', 'PDD', 'RIVN', 'V', 'NVDA']
+        #
+        # main(opt1, opt2)
 
     else:
         parser = argparse.ArgumentParser()
         # Add a required, positional argument
         parser.add_argument("opt1",
                             choices=["company_info", "quote_table", "historical_price_year","get_stats", "stats_valuation",
-                                    "next_earnings_date","earnings_history", "earnings_for_date","earnings",
+                                    "next_earnings_date","earnings_history", "earnings_for_date","earnings","get_splits",
                                      "analysts_info", "financials","news"],
                             type=str, help="Your name")
         parser.add_argument("opt2")

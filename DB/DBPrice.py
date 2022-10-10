@@ -5,6 +5,22 @@ import pyodbc
 from Util import  SystemEnv
 #
 # db_connection_String = SystemEnv.g_mssql_connection.ConnectionString
+
+def update_stock_splits(ticker=str, SplitDate=str, SplitRatio=str, constr=None):
+    try:
+        if not constr:
+            constr = SystemEnv.g_globaldb_constr
+
+        conn = pyodbc.connect(constr)
+        cursor = conn.cursor()
+        proc = "exec dbo.usp_Stock_Splits_IU '{}','{}','{}'".format(ticker, SplitDate, SplitRatio)
+        cursor.execute(proc)
+        conn.commit()
+    except pyodbc.Error as e:
+        print("Failed to execute stored procedure: {}".format(e))
+    finally:
+        cursor.close()
+        conn.close()
 def update_Revenue_Earnings_EPS(ticker,period ,yrQtr , itemname, itemvalue , constr=str):
     """
     Table Revenue_Earnings_EPS - (Year or Year Quarter, Revenue, Earnings,, EPS_Actual,EPS_Estimate)
