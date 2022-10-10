@@ -139,6 +139,8 @@ def main(opt1=str,opt2=None,opt3=None,opt4=None):
         Yahoo_FinanceData.get_earnings_for_date(ls_tickers, SystemEnv.g_globaldb_constr)
     elif opt1 == "get_splits":
         Yahoo_FinanceData.get_splits( opt2)
+    elif opt1 == "get_dividends":
+        Yahoo_FinanceData.get_dividends( opt2)
     elif opt1 == "news":
         Yahoo_FinanceData.get_news(opt2)
     else:
@@ -165,6 +167,7 @@ if __name__ == '__main__':
         opt1 = "get_splits"
         opt2 = ['AMZN', 'AAPL', 'MSTR', 'NCTY', 'OPEN', 'BLNK', 'TSLA', 'NVDA', 'MSFT', 'BABA', 'GOOG', 'GOOGL',
                       'META', 'NIO', 'PDD', 'RIVN', 'V', 'NVDA']
+        opt1 = "get_dividends"
 
         main(opt1, opt2)
 
@@ -180,7 +183,7 @@ if __name__ == '__main__':
         parser.add_argument("opt1",
                             choices=["company_info", "quote_table", "historical_price_year","get_stats", "stats_valuation",
                                     "next_earnings_date","earnings_history", "earnings_for_date","earnings","get_splits",
-                                     "analysts_info", "financials","news"],
+                                    "get_dividends", "analysts_info", "financials","news"],
                             type=str, help="Your name")
         parser.add_argument("opt2")
 

@@ -6,6 +6,21 @@ from Util import  SystemEnv
 #
 # db_connection_String = SystemEnv.g_mssql_connection.ConnectionString
 
+def update_stock_dividends(ticker=str, DividendDate=str, Dividend=float, constr=None):
+    try:
+        if not constr:
+            constr = SystemEnv.g_globaldb_constr
+
+        conn = pyodbc.connect(constr)
+        cursor = conn.cursor()
+        proc = "exec dbo.usp_Stock_Dividends_IU '{}','{}',{}".format(ticker, DividendDate, Dividend)
+        cursor.execute(proc)
+        conn.commit()
+    except pyodbc.Error as e:
+        print("Failed to execute stored procedure: {}".format(e))
+    finally:
+        cursor.close()
+        conn.close()
 def update_stock_splits(ticker=str, SplitDate=str, SplitRatio=str, constr=None):
     try:
         if not constr:

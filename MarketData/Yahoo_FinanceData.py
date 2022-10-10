@@ -587,21 +587,36 @@ def get_historical_price(tickers=list,start_date=str, end_date=str, db_constr=st
     return df_price
 
 
-# def get_splits_year(tickers, start_year, end_year):
-#     db_string = SystemEnv.g_mssql_connection.get('connectionstring')
-#     no_of_year = end_year - start_year
-#
-#     i = 0
-#     while i <= no_of_year :
-#         start_date = "01/01/{}".format(start_year + i)
-#         end_date= "12/31/{}".format(start_year + i)
-#         if __debug__:
-#             print("Ticker={}, Start_Date={}, End_Date={}".format(tickers,start_date,end_date))
-#         try:
-#             get_splits(tickers,start_date,end_date,db_string)
-#         except Exception as e:
-#             print("get_splits_year() Error : {}".format(str(e)))
-#         i = i + 1
+def get_dividends(tickers=list,db_constr=None):
+    """
+    Note :  Retrieving historical stock splits data of a stock
+      :param tickers:
+      :param start_date:
+      :param end_date:
+      :param db_constr : ConnectionString
+      :return: pd.DataFrame
+    """
+    # if not db_constr:
+    #     db_constr = SystemEnv.g_globaldb_constr
+
+    try:
+        for ticker in tickers:
+            if __debug__:
+                print("----- Ticker {} ----- ".format(ticker))
+            try:
+                df_data = si.get_dividends(ticker)
+            except Exception as e:
+                print("Ticker {} No Splits. {} ".format(ticker, str(e)))
+                continue
+
+            for index, row in df_data.iterrows():
+                if __debug__:
+                    print("DividendDate={},Dividend={}, Ticker={}".format(index, row['dividend'], row['ticker']))
+                DBPrice.update_stock_dividends(row['ticker'], index, row['dividend'])
+    except Exception as e:
+        print("get_splits () Error : {}".format(str(e)))
+        raise  e
+
 def get_splits(tickers=list,db_constr=None):
     """
     Note :  Retrieving historical stock splits data of a stock
