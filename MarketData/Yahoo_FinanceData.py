@@ -4,7 +4,8 @@ import numpy as np
 import pandas as pd
 from Util import FileUtil, SystemEnv
 from Instrument import SymbolPd
-from DB import DBPrice
+# from DB import DBPrice
+import DB_Global as dbGloal
 from MarketData import Yahoo_fin_Library
 import yahoo_fin.stock_info as si
 from yahoo_fin import news
@@ -147,7 +148,7 @@ def get_stats_valuation(tickers=list, db_constr=str):
                 for i in range(1, len(row)):
                     # print("date ='{}' , itemname={}, itemvalue={}".format(df.columns[i].replace('As of Date:','')\
                     #                                                     .replace('Current','').strip(), row[0],row[i]))
-                    DBPrice.update_stats_valuation(ticker, df.columns[i].replace('As of Date:','').replace('Current','').strip(),\
+                    dbGloal.update_stats_valuation(ticker, df.columns[i].replace('As of Date:','').replace('Current','').strip(),\
                                          row[0],row[i], db_constr)
 
                 # print("{} {} {}".format( index, columns[1],row[0], row[1]))
@@ -187,7 +188,7 @@ def get_stats(tickers=list, db_constr=str):
 
             for index, row in df.iterrows():
                 # print("item ={}, value =  {}".format(row['Attribute'], row['Value']))
-                DBPrice.update_stats(ticker,MostRecentQuarter, row['Attribute'],row['Value'], db_constr)
+                dbGloal.update_stats(ticker,MostRecentQuarter, row['Attribute'],row['Value'], db_constr)
 
     except Exception as e:
         print("Tickers {} : Invalid, get_stats : {}".format(tickers, e))
@@ -236,7 +237,7 @@ def get_earnings(tickers=list, db_constr=str):
                         # print(" Date {} {}, {} = {}".format(df.columns[0],
                         #                             row[0] if period != 'quarterly' else row[0][2:]+row[0][0:2],
                         #                             df.columns[i], row[i]))
-                        DBPrice.update_Revenue_Earnings_EPS(ticker,period
+                        dbGloal.update_Revenue_Earnings_EPS(ticker,period
                                                             ,row[0] if period != 'quarterly' else row[0][2:]+row[0][0:2]
                                                             , df.columns[i], row[i], db_constr)
 
@@ -293,7 +294,7 @@ def get_earnings_history(tickers=list, db_constr=str):
                 for itemname,itemvalue in  dic_values.items():
                     if 'eps' in itemname:
                         print("{} ,{}, {}, {}".format(ticker,earningsdate, itemname, itemvalue))
-                        DBPrice.update_EPS_history(ticker, earningsdate, itemname, itemvalue , db_constr)
+                        dbGloal.update_EPS_history(ticker, earningsdate, itemname, itemvalue , db_constr)
 
     except Exception as e:
         print("Tickers {} : Invalid, get_earnings_history : {}".format(tickers, e))
@@ -314,7 +315,7 @@ def get_next_earnings_date(tickers=list, db_constr=str):
 
         for ticker, earningsDt in dict_data.items():
             # print("Ticker={} Next Earning Date {} ------------".format(ticker,earningsDt.strftime("%m/%d/%Y")))
-            DBPrice.update_next_earnings_date(ticker,earningsDt.strftime("%m/%d/%Y"),db_constr )
+            dbGloal.update_next_earnings_date(ticker,earningsDt.strftime("%m/%d/%Y"),db_constr )
     except Exception as e:
         print("Tickers {} : Invalid, get_quote_data : {}".format(tickers, e))
         return
@@ -340,7 +341,7 @@ def get_analysts_info(tickers=list,db_constr=str) -> dict:
         dict_data = {ticker: si.get_analysts_info(ticker) for ticker in tickers}
 
         for ticker, df in dict_data.items():
-             DBPrice.update_analysts_info(ticker, df, db_constr)
+             dbGloal.update_analysts_info(ticker, df, db_constr)
 
     except Exception as e:
         print("Tickers {} : Invalid, get_stats_valuation : {}".format(tickers, e))
